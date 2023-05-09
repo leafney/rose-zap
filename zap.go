@@ -8,10 +8,21 @@ import (
 
 type Logger struct {
 	logger *zap.Logger
+	config *Config
 }
 
 func New() *Logger {
-	config := zapcore.EncoderConfig{
+	logger := &Logger{
+		config: newConfig(),
+	}
+	logger.ApplyConfig()
+	return logger
+}
+
+func (l *Logger) ApplyConfig() {
+	conf := l.config
+
+	encConfig := zapcore.EncoderConfig{
 		TimeKey:        "time",
 		LevelKey:       "level",
 		NameKey:        "logger",
@@ -25,16 +36,15 @@ func New() *Logger {
 		EncodeCaller:   zapcore.ShortCallerEncoder,
 	}
 
-	encoder := zapcore.NewJSONEncoder(config)
+	encoder := zapcore.NewJSONEncoder(encConfig)
 
 	writer := zapcore.AddSync(os.Stdout)
 
-	core := zapcore.NewCore(encoder, writer, zap.InfoLevel)
+	conf.atomicLevel.SetLevel(getLevel(conf.level))
 
-	logger := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
-	return &Logger{
-		logger: logger,
-	}
+	core := zapcore.NewCore(encoder, writer, conf.atomicLevel)
+
+	l.logger = zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
 }
 
 func (l *Logger) Debug(msg string, fields ...zap.Field) {
@@ -63,4 +73,23 @@ func (l *Logger) Panic(msg string, fields ...zap.Field) {
 
 func (l *Logger) Sync() error {
 	return l.logger.Sync()
+}
+
+func getLevel(level string) zapcore.Level {
+	switch level {
+	case "debug":
+		return zap.DebugLevel
+	case "info":
+		return zap.InfoLevel
+	case "warn":
+		return zap.WarnLevel
+	case "error":
+		return zap.ErrorLevel
+	case "panic":
+		return zap.PanicLevel
+	case "fatal":
+		return zap.FatalLevel
+	default:
+		return zap.InfoLevel
+	}
 }

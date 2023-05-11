@@ -26,26 +26,10 @@ func NewConfig() *Config {
 		atomicLevel: zap.NewAtomicLevel(),
 		callerSkip:  1,
 	}
-	//c.setDefaults()
 
-	//// 配置项
-	//var opt options
-	//for _, o := range opts {
-	//	o(&opt)
-	//}
-	//
-	//if opt.callerSkip > 1 {
-	//	c.callerSkip = opt.callerSkip
-	//}
-	//
-	//if len(opt.level) > 0 {
-	//	c.atomicLevel.SetLevel(getLevel(opt.level))
-	//}
-
-	//return c
 }
 
-func (c *Config) Build() *zap.Logger {
+func (c *Config) build() *zap.Logger {
 
 	encConfig := zapcore.EncoderConfig{
 		TimeKey:        "time",

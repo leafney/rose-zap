@@ -1,19 +1,13 @@
 package rzap
 
 import (
-	"fmt"
 	"go.uber.org/zap"
 	"testing"
 )
 
 func TestNewLogger(t *testing.T) {
-	//config := NewConfig(func(o *options) {
-	//	o.level = "debug"
-	//})
 
 	config := NewConfig()
-	fmt.Println(config)
-
 	config.SetLevel("debug")
 
 	log := NewLogger(config)

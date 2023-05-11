@@ -2,49 +2,20 @@ package rzap
 
 import (
 	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
-	"os"
 )
 
 type Logger struct {
 	logger *zap.Logger
-	config *Config
+	sugar  *zap.SugaredLogger
 }
 
-func New() *Logger {
-	logger := &Logger{
-		config: newConfig(),
+func NewLogger(config *Config) *Logger {
+	logger := config.Build()
+
+	return &Logger{
+		logger: logger,
+		sugar:  logger.Sugar(),
 	}
-	logger.ApplyConfig()
-	return logger
-}
-
-func (l *Logger) ApplyConfig() {
-	conf := l.config
-
-	encConfig := zapcore.EncoderConfig{
-		TimeKey:        "time",
-		LevelKey:       "level",
-		NameKey:        "logger",
-		CallerKey:      "caller",
-		MessageKey:     "msg",
-		StacktraceKey:  "stacktrace",
-		LineEnding:     zapcore.DefaultLineEnding,
-		EncodeLevel:    zapcore.LowercaseLevelEncoder,
-		EncodeTime:     zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05.000"),
-		EncodeDuration: zapcore.SecondsDurationEncoder,
-		EncodeCaller:   zapcore.ShortCallerEncoder,
-	}
-
-	encoder := zapcore.NewJSONEncoder(encConfig)
-
-	writer := zapcore.AddSync(os.Stdout)
-
-	conf.atomicLevel.SetLevel(getLevel(conf.level))
-
-	core := zapcore.NewCore(encoder, writer, conf.atomicLevel)
-
-	l.logger = zap.New(core, zap.AddCaller(), zap.AddCallerSkip(1))
 }
 
 func (l *Logger) Debug(msg string, fields ...zap.Field) {
@@ -75,21 +46,14 @@ func (l *Logger) Sync() error {
 	return l.logger.Sync()
 }
 
-func getLevel(level string) zapcore.Level {
-	switch level {
-	case "debug":
-		return zap.DebugLevel
-	case "info":
-		return zap.InfoLevel
-	case "warn":
-		return zap.WarnLevel
-	case "error":
-		return zap.ErrorLevel
-	case "panic":
-		return zap.PanicLevel
-	case "fatal":
-		return zap.FatalLevel
-	default:
-		return zap.InfoLevel
-	}
+func (l *Logger) SDebug(args ...interface{}) {
+	l.sugar.Debug(args...)
+}
+
+func (l *Logger) SDebugf(template string, args ...interface{}) {
+	l.sugar.Debugf(template, args...)
+}
+
+func (l *Logger) SDebugw(msg string, keysAndValues ...interface{}) {
+	l.sugar.Debugw(msg, keysAndValues...)
 }

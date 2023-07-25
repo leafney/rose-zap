@@ -11,6 +11,7 @@ type Config struct {
 	level       zapcore.Level
 	atomicLevel zap.AtomicLevel
 	callerSkip  int
+	showCaller  bool
 	formatJson  bool
 	outConsole  bool
 	outFile     *OutFile
@@ -25,6 +26,7 @@ func NewConfig() *Config {
 		//level:       "info",
 		atomicLevel: zap.NewAtomicLevel(),
 		callerSkip:  1,
+		showCaller:  true,
 	}
 
 }
@@ -55,10 +57,20 @@ func (c *Config) build() *zap.Logger {
 
 	core := zapcore.NewCore(encoder, writer, c.atomicLevel)
 
-	return zap.New(core, zap.AddCaller(), zap.AddCallerSkip(c.callerSkip))
+	return zap.New(core,
+		//zap.AddCaller(),
+		zap.WithCaller(c.showCaller),
+		zap.AddCallerSkip(c.callerSkip),
+		zap.AddStacktrace(zapcore.WarnLevel),
+	) //
 }
 
 func (c *Config) SetLevel(level string) *Config {
 	c.atomicLevel.SetLevel(getLevel(level))
+	return c
+}
+
+func (c *Config) ShowCaller(enabled bool) *Config {
+	c.showCaller = enabled
 	return c
 }

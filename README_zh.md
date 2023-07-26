@@ -88,4 +88,12 @@ func main(){
         ShowCaller(true)
 ```
 
-### 
+### 显示堆栈信息
+
+通过 `ShowStacktrace()` 方法设置是否显示错误堆栈信息。默认情况下显示 `warning` 级别及以上的错误堆栈。
+
+```go
+    cfg := rzap.NewConfig().
+        ShowStacktrace(false)
+```
+

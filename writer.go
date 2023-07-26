@@ -18,7 +18,7 @@ func StdOutWriter() zapcore.WriteSyncer {
 	return zapcore.AddSync(os.Stdout)
 }
 
-func SingleFileWriter(cfg *FileConfig, showStdout bool) zapcore.WriteSyncer {
+func FileWriter(cfg *FileConfig, showStdout bool) zapcore.WriteSyncer {
 
 	fileWriterSyncer := zapcore.AddSync(&lumberjack.Logger{
 		Filename:   cfg.FileName,
@@ -36,7 +36,7 @@ func SingleFileWriter(cfg *FileConfig, showStdout bool) zapcore.WriteSyncer {
 	return fileWriterSyncer
 }
 
-func MultiFilesWriter(showStdout bool) zapcore.WriteSyncer {
-
-	return zapcore.NewMultiWriteSyncer()
-}
+//func MultiFilesWriter(showStdout bool) zapcore.WriteSyncer {
+//
+//	return zapcore.NewMultiWriteSyncer()
+//}

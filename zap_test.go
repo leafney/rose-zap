@@ -9,10 +9,12 @@ import (
 func TestNewLogger(t *testing.T) {
 
 	cfg := NewConfig()
-	cfg.SetLevel("debug")
+
 	//cfg.SetCallSkip(1)
-	cfg.ShowCaller(true)
-	cfg.UseFmtJson(false)
+
+	cfg.ShowCaller(true).
+		UseFmtJson(true).
+		SetLevel("debug")
 
 	log := NewLogger(cfg)
 	defer log.Sync()

@@ -13,12 +13,8 @@ type Config struct {
 	showCaller  bool
 	formatJson  bool
 	outConsole  bool
-	outFile     *OutFile
-}
-
-type OutFile struct {
-	enable   bool
-	FileName string
+	outType     OTP
+	outFile     *FileConfig
 }
 
 func NewConfig() *Config {
@@ -28,7 +24,16 @@ func NewConfig() *Config {
 		callerSkip:  1,
 		showCaller:  true,
 		outConsole:  true,
+		outType:     0,
 		formatJson:  true,
+		outFile: &FileConfig{
+			FileName:   DefaultSingleFilename,
+			MaxSize:    1024,
+			MaxBackups: 0,
+			MaxAge:     1,
+			LocalTime:  true,
+			Compress:   false,
+		},
 	}
 
 }
@@ -54,7 +59,7 @@ func (c *Config) build() *zap.Logger {
 
 	//writer := zapcore.AddSync(os.Stdout)
 
-	writer := SingleFileWriter(&FileLogConfig{}, false)
+	writer := SingleFileWriter(c.outFile, c.outConsole)
 
 	//fmt.Println("level ", conf.level)
 
@@ -87,5 +92,45 @@ func (c *Config) SetCallSkip(skip int) *Config {
 
 func (c *Config) UseFmtJson(enabled bool) *Config {
 	c.formatJson = enabled
+	return c
+}
+
+//func (c *Config) OutConsole() *Config {
+//
+//	return c
+//}
+
+func (c *Config) OutSingleFileDefault(filename string, outConsole bool) *Config {
+	c.outType = OutTypeSingleFileDefault
+	c.outConsole = outConsole
+	c.outFile.FileName = filename
+
+	return c
+}
+
+func (c *Config) OutSingleFileCustom(outConsole bool) *Config {
+	c.outType = OutTypeSingleFileCustom
+	c.outConsole = outConsole
+	return c
+}
+
+func (c *Config) OutMultiFilesDefault(outConsole bool) *Config {
+	c.outType = OutTypeMultiFileDefault
+	c.outConsole = outConsole
+	//c.outFile.FileName = filename
+
+	return c
+}
+
+func (c *Config) OutMultiFilesCustom(outConsole bool) *Config {
+	c.outType = OutTypeMultiFileCustom
+	c.outConsole = outConsole
+	return c
+}
+
+func (c *Config) OutInfoConsoleErrorFile() *Config {
+	c.outType = OutTypeInfoError
+	c.outConsole = true
+
 	return c
 }

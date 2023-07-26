@@ -14,26 +14,19 @@ import (
 	"os"
 )
 
-type FileLogConfig struct {
-	FileName   string
-	MaxSize    int
-	MaxBackups int
-	MaxAge     int
-}
-
 func StdOutWriter() zapcore.WriteSyncer {
 	return zapcore.AddSync(os.Stdout)
 }
 
-func SingleFileWriter(cfg *FileLogConfig, showStdout bool) zapcore.WriteSyncer {
+func SingleFileWriter(cfg *FileConfig, showStdout bool) zapcore.WriteSyncer {
 
 	fileWriterSyncer := zapcore.AddSync(&lumberjack.Logger{
 		Filename:   cfg.FileName,
 		MaxSize:    cfg.MaxSize,
 		MaxBackups: cfg.MaxBackups,
 		MaxAge:     cfg.MaxAge,
-		LocalTime:  true,
-		Compress:   false,
+		LocalTime:  cfg.LocalTime,
+		Compress:   cfg.Compress,
 	})
 
 	if showStdout {

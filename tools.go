@@ -3,10 +3,11 @@ package rzap
 import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"strings"
 )
 
 func getLevel(level string) zapcore.Level {
-	switch level {
+	switch strings.ToLower(level) {
 	case "debug":
 		return zap.DebugLevel
 	case "info":

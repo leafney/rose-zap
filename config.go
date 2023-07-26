@@ -3,12 +3,11 @@ package rzap
 import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"os"
 )
 
 type Config struct {
 	//level       string
-	level       zapcore.Level
+	//level       zapcore.Level
 	atomicLevel zap.AtomicLevel
 	callerSkip  int
 	showCaller  bool
@@ -18,7 +17,8 @@ type Config struct {
 }
 
 type OutFile struct {
-	enable bool
+	enable   bool
+	FileName string
 }
 
 func NewConfig() *Config {
@@ -27,6 +27,8 @@ func NewConfig() *Config {
 		atomicLevel: zap.NewAtomicLevel(),
 		callerSkip:  1,
 		showCaller:  true,
+		outConsole:  true,
+		formatJson:  true,
 	}
 
 }
@@ -47,9 +49,12 @@ func (c *Config) build() *zap.Logger {
 		EncodeCaller:   zapcore.ShortCallerEncoder,
 	}
 
-	encoder := zapcore.NewJSONEncoder(encConfig)
+	//encoder := zapcore.NewJSONEncoder(encConfig)
+	encoder := GetEncode(c.formatJson, encConfig)
 
-	writer := zapcore.AddSync(os.Stdout)
+	//writer := zapcore.AddSync(os.Stdout)
+
+	writer := SingleFileWriter(&FileLogConfig{}, false)
 
 	//fmt.Println("level ", conf.level)
 
@@ -72,5 +77,15 @@ func (c *Config) SetLevel(level string) *Config {
 
 func (c *Config) ShowCaller(enabled bool) *Config {
 	c.showCaller = enabled
+	return c
+}
+
+func (c *Config) SetCallSkip(skip int) *Config {
+	c.callerSkip = skip
+	return c
+}
+
+func (c *Config) UseFmtJson(enabled bool) *Config {
+	c.formatJson = enabled
 	return c
 }

@@ -8,11 +8,13 @@ import (
 
 func TestNewLogger(t *testing.T) {
 
-	config := NewConfig()
-	config.SetLevel("debug")
-	config.ShowCaller(false)
+	cfg := NewConfig()
+	cfg.SetLevel("debug")
+	//cfg.SetCallSkip(1)
+	cfg.ShowCaller(true)
+	cfg.UseFmtJson(false)
 
-	log := NewLogger(config)
+	log := NewLogger(cfg)
 	defer log.Sync()
 
 	log.Info("测试日志输出", zap.String("name", "tom"))

@@ -16,9 +16,10 @@ func TestNewLogger(t *testing.T) {
 	cfg.ShowCaller(true).
 		UseFmtJson(true).
 		//ShowStacktrace(false).
-		OutSingleFileDefault(true, "logs/mylog.log").
+		//OutSingleFileDefault(true, "logs/mylog.log").
 		//OutMultiFilesDefault(false, "", "").
 		//OutInfoConsoleErrorFile("").
+		SetFileConfig(WithFileName(""), WithMaxSize(1)).
 		SetLevel("debug")
 
 	log := NewLogger(cfg)

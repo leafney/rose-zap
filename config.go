@@ -13,7 +13,10 @@ type Config struct {
 	withConsole    bool
 	outType        OTP
 	outFile        *FileConfig
-	singleFilename string
+	outInfoFile    *FileConfig
+	outErrorFile   *FileConfig
+	outCustom      bool
+	singleFilename string //
 	infoFilename   string
 	errorFilename  string
 	showStacktrace bool
@@ -26,6 +29,7 @@ func NewConfig() *Config {
 		showCaller:     true,
 		withConsole:    true,
 		outType:        OutTypeConsole,
+		outCustom:      false,
 		formatJson:     true,
 		showStacktrace: true,
 		outFile: &FileConfig{
@@ -85,16 +89,20 @@ func (c *Config) build() *zap.Logger {
 	var core zapcore.Core
 	switch c.outType {
 	case OutTypeSingleFileDefault:
-		cfg := c.outFile
-		cfg.FileName = c.singleFilename
-		singleFileWriter := FileWriter(cfg, c.withConsole)
-		core = zapcore.NewCore(encoder, singleFileWriter, c.atomicLevel)
+		fallthrough
 	case OutTypeSingleFileCustom:
-	//	TODO
+		singleFileWriter := FileWriter(c.outFile, c.withConsole)
+		core = zapcore.NewCore(encoder, singleFileWriter, c.atomicLevel)
 
 	case OutTypeMultiFileDefault:
+		if c.outInfoFile != nil {
+			c.outInfoFile.FileName = DefaultMultiFilenameInfo
+		}
+
+		fallthrough
+	case OutTypeMultiFileCustom:
 		infoCfg := c.outFile
-		infoCfg.FileName = c.infoFilename
+
 		infoFileWriter := FileWriter(infoCfg, c.withConsole)
 		infoFileCore := zapcore.NewCore(encoder, infoFileWriter, lowPriority)
 
@@ -103,9 +111,7 @@ func (c *Config) build() *zap.Logger {
 		errorFileWriter := FileWriter(errorCfg, c.withConsole)
 		errorFileCore := zapcore.NewCore(encoder, errorFileWriter, highPriority)
 		core = zapcore.NewTee(infoFileCore, errorFileCore)
-	case OutTypeMultiFileCustom:
-		//	TODO
-		
+
 	case OutTypeInfoError:
 		consoleCore := zapcore.NewCore(encoder, consoleWriter, lowPriority)
 
@@ -160,6 +166,10 @@ func (c *Config) ShowStacktrace(enabled bool) *Config {
 	return c
 }
 
+// --------------
+
+/*
+
 // OutSingleFileDefault `filename` default path "logs/rzap.log"
 func (c *Config) OutSingleFileDefault(withConsole bool, filename string) *Config {
 	c.outType = OutTypeSingleFileDefault
@@ -207,5 +217,61 @@ func (c *Config) OutInfoConsoleErrorFile(errorFilename string) *Config {
 		errorFilename = DefaultMultiFilenameError
 	}
 	c.errorFilename = errorFilename
+	return c
+}
+
+*/
+
+// --------------
+
+func (c *Config) OutSingleFile(withConsole bool) *Config {
+	c.outType = OutTypeSingleFileDefault
+	c.withConsole = withConsole
+	c.outCustom = false
+	return c
+}
+
+func (c *Config) OutMultiFile(withConsole bool) *Config {
+	c.outType = OutTypeMultiFileDefault
+	c.withConsole = withConsole
+	c.outCustom = false
+	return c
+}
+
+func (c *Config) OutInfoConsoleErrorFile() *Config {
+	c.outType = OutTypeInfoError
+	c.withConsole = true
+	c.outCustom = false
+	return c
+}
+
+func (c *Config) SetFileConfig(opts ...Option) *Config {
+	c.outCustom = true
+
+	for _, opt := range opts {
+		opt(c.outFile)
+	}
+	return c
+}
+
+func (c *Config) SetInfoFileConfig(opts ...Option) *Config {
+	c.outCustom = true
+
+	c.outInfoFile = c.outFile
+	c.outInfoFile.FileName = DefaultMultiFilenameInfo
+	for _, opt := range opts {
+		opt(c.outInfoFile)
+	}
+	return c
+}
+
+func (c *Config) SetErrorFileConfig(opts ...Option) *Config {
+	c.outCustom = true
+
+	c.outErrorFile = c.outFile
+	c.outErrorFile.FileName = DefaultMultiFilenameError
+	for _, opt := range opts {
+		opt(c.outErrorFile)
+	}
 	return c
 }

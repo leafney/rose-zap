@@ -21,10 +21,11 @@ func TestNewLogger(t *testing.T) {
 		//OutInfoConsoleErrorFile("").
 		//OutSingleFile(true).
 		OutMultiFile(true).
+		SetFileConfig(WithLocalTime(false), WithMaxSize(402), WithFileName("logs/xxx.log")).
 		//SetFileConfig(WithFileName(""), WithMaxSize(1), WithMaxBackups(2)).
 		//OutInfoConsoleErrorFile().
 		//SetFileConfig(WithFileName("logs/cdf.log")).
-		//SetInfoFileConfig(WithFileName(""), WithMaxBackups(22), WithLocalTime(false)).
+		SetInfoFileConfig(WithFileName(""), WithMaxSize(33)).
 		//SetErrorFileConfig(WithFileName("logs/yyyy.log")).
 		SetLevel("debug")
 

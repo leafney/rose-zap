@@ -19,7 +19,13 @@ func TestNewLogger(t *testing.T) {
 		//OutSingleFileDefault(true, "logs/mylog.log").
 		//OutMultiFilesDefault(false, "", "").
 		//OutInfoConsoleErrorFile("").
-		SetFileConfig(WithFileName(""), WithMaxSize(1)).
+		//OutSingleFile(true).
+		OutMultiFile(true).
+		//SetFileConfig(WithFileName(""), WithMaxSize(1), WithMaxBackups(2)).
+		//OutInfoConsoleErrorFile().
+		//SetFileConfig(WithFileName("logs/cdf.log")).
+		SetInfoFileConfig(WithFileName("logs/mmmm.log"), WithMaxBackups(22), WithLocalTime(false)).
+		SetErrorFileConfig(WithFileName("logs/yyyy.log")).
 		SetLevel("debug")
 
 	log := NewLogger(cfg)

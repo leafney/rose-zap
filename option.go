@@ -8,6 +8,8 @@
 
 package rzap
 
+import "fmt"
+
 type FileConfig struct {
 	FileName   string
 	MaxSize    int
@@ -21,7 +23,10 @@ type Option func(f *FileConfig)
 
 func WithFileName(filename string) Option {
 	return func(f *FileConfig) {
-		f.FileName = filename
+		fmt.Printf("filename [%v]\n", filename)
+		if len(filename) > 0 {
+			f.FileName = filename
+		}
 	}
 }
 

@@ -1,24 +1,25 @@
 package rzap
 
 import (
+	"fmt"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
 type Config struct {
-	atomicLevel    zap.AtomicLevel
-	callerSkip     int
-	showCaller     bool
-	formatJson     bool
-	withConsole    bool
-	outType        OTP
-	outFile        *FileConfig
-	outInfoFile    *FileConfig
-	outErrorFile   *FileConfig
-	outCustom      bool
-	singleFilename string //
-	infoFilename   string
-	errorFilename  string
+	atomicLevel  zap.AtomicLevel
+	callerSkip   int
+	showCaller   bool
+	formatJson   bool
+	withConsole  bool
+	outType      OTP
+	outFile      *FileConfig
+	outInfoFile  *FileConfig
+	outErrorFile *FileConfig
+	outCustom    bool
+	//singleFilename string //
+	//infoFilename   string
+	//errorFilename  string
 	showStacktrace bool
 }
 
@@ -40,6 +41,8 @@ func NewConfig() *Config {
 			LocalTime:  true,
 			Compress:   false,
 		},
+		outInfoFile:  nil,
+		outErrorFile: nil,
 	}
 }
 
@@ -86,6 +89,19 @@ func (c *Config) build() *zap.Logger {
 	//infoFileWriter := FileWriter(&FileConfig{}, c.withConsole)
 	//errorFileWriter := FileWriter(&FileConfig{}, c.withConsole)
 
+	if c.outCustom {
+		if c.outType == OutTypeSingleFileDefault {
+			c.outType = OutTypeSingleFileCustom
+		} else if c.outType == OutTypeMultiFileDefault {
+			c.outType = OutTypeMultiFileCustom
+		}
+	}
+
+	fmt.Printf("outType [%v]\n", c.outType)
+	fmt.Printf("outFile [%v]\n", c.outFile)
+	fmt.Printf("outInfoFile [%v]\n", c.outInfoFile)
+	fmt.Printf("outErrorFile [%v]\n", c.outErrorFile)
+
 	var core zapcore.Core
 	switch c.outType {
 	case OutTypeSingleFileDefault:
@@ -93,32 +109,43 @@ func (c *Config) build() *zap.Logger {
 	case OutTypeSingleFileCustom:
 		singleFileWriter := FileWriter(c.outFile, c.withConsole)
 		core = zapcore.NewCore(encoder, singleFileWriter, c.atomicLevel)
-
 	case OutTypeMultiFileDefault:
-		if c.outInfoFile != nil {
-			c.outInfoFile.FileName = DefaultMultiFilenameInfo
-		}
-
 		fallthrough
 	case OutTypeMultiFileCustom:
 		infoCfg := c.outFile
+		infoCfg.FileName = DefaultMultiFilenameInfo
+		if c.outInfoFile != nil {
+			infoCfg = c.outInfoFile
+		}
+
+		fmt.Printf("infoCfg [%v] outInfoFile [%v]\n", infoCfg, c.outInfoFile)
 
 		infoFileWriter := FileWriter(infoCfg, c.withConsole)
 		infoFileCore := zapcore.NewCore(encoder, infoFileWriter, lowPriority)
 
 		errorCfg := c.outFile
-		errorCfg.FileName = c.errorFilename
+		errorCfg.FileName = DefaultMultiFilenameError
+		if c.outErrorFile != nil {
+			errorCfg = c.outErrorFile
+		}
+
+		fmt.Printf("errorCfg [%v] outErrorFile [%v]\n", errorCfg, c.outErrorFile)
+
 		errorFileWriter := FileWriter(errorCfg, c.withConsole)
 		errorFileCore := zapcore.NewCore(encoder, errorFileWriter, highPriority)
-		core = zapcore.NewTee(infoFileCore, errorFileCore)
 
+		core = zapcore.NewTee(infoFileCore, errorFileCore)
 	case OutTypeInfoError:
 		consoleCore := zapcore.NewCore(encoder, consoleWriter, lowPriority)
 
-		errCfg := c.outFile
-		errCfg.FileName = c.errorFilename
-		errorFileWriter := FileWriter(errCfg, c.withConsole)
+		errorCfg := c.outFile
+		errorCfg.FileName = DefaultMultiFilenameError
+		if c.outErrorFile != nil {
+			errorCfg = c.outErrorFile
+		}
+		errorFileWriter := FileWriter(errorCfg, c.withConsole)
 		errorFileCore := zapcore.NewCore(encoder, errorFileWriter, highPriority)
+
 		core = zapcore.NewTee(consoleCore, errorFileCore)
 	default:
 		core = zapcore.NewCore(encoder, consoleWriter, c.atomicLevel)
@@ -134,10 +161,10 @@ func (c *Config) build() *zap.Logger {
 
 	return zap.New(core,
 		option...,
-		//zap.AddCaller(),
-		//zap.WithCaller(c.showCaller),
-		//zap.AddCallerSkip(c.callerSkip),
-		//zap.AddStacktrace(zapcore.WarnLevel),
+	//zap.AddCaller(),
+	//zap.WithCaller(c.showCaller),
+	//zap.AddCallerSkip(c.callerSkip),
+	//zap.AddStacktrace(zapcore.WarnLevel),
 	)
 }
 
@@ -227,14 +254,14 @@ func (c *Config) OutInfoConsoleErrorFile(errorFilename string) *Config {
 func (c *Config) OutSingleFile(withConsole bool) *Config {
 	c.outType = OutTypeSingleFileDefault
 	c.withConsole = withConsole
-	c.outCustom = false
+	//c.outCustom = false
 	return c
 }
 
 func (c *Config) OutMultiFile(withConsole bool) *Config {
 	c.outType = OutTypeMultiFileDefault
 	c.withConsole = withConsole
-	c.outCustom = false
+	//c.outCustom = false
 	return c
 }
 
@@ -260,6 +287,7 @@ func (c *Config) SetInfoFileConfig(opts ...Option) *Config {
 	c.outInfoFile = c.outFile
 	c.outInfoFile.FileName = DefaultMultiFilenameInfo
 	for _, opt := range opts {
+		fmt.Printf("opt [%v] \n", opt)
 		opt(c.outInfoFile)
 	}
 	return c

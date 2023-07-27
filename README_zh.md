@@ -2,7 +2,7 @@
  
 日志库 [uber-go/zap](https://github.com/uber-go/zap) 的封装类
 
-----
+[English](README.md) | 简体中文
 
 ## 安装
 

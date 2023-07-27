@@ -2,7 +2,7 @@
 
 Wrapper class for the logging library [uber-go/zap](https://github.com/uber-go/zap)
 
-----
+English | [简体中文](README_zh.md)
 
 ## Installation
 

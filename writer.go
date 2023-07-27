@@ -9,7 +9,6 @@
 package rzap
 
 import (
-	"fmt"
 	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap/zapcore"
 	"os"
@@ -20,8 +19,6 @@ func StdOutWriter() zapcore.WriteSyncer {
 }
 
 func FileWriter(cfg *FileConfig, showStdout bool) zapcore.WriteSyncer {
-
-	fmt.Printf("name [%v] size [%v] backup [%v] age [%v] time [%v] compress [%v]\n", cfg.FileName, cfg.MaxSize, cfg.MaxBackups, cfg.MaxAge, cfg.LocalTime, cfg.Compress)
 
 	fileWriterSyncer := zapcore.AddSync(&lumberjack.Logger{
 		Filename:   cfg.FileName,
@@ -38,8 +35,3 @@ func FileWriter(cfg *FileConfig, showStdout bool) zapcore.WriteSyncer {
 
 	return fileWriterSyncer
 }
-
-//func MultiFilesWriter(showStdout bool) zapcore.WriteSyncer {
-//
-//	return zapcore.NewMultiWriteSyncer()
-//}

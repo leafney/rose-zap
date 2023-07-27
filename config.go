@@ -139,6 +139,7 @@ func (c *Config) build() *zap.Logger {
 		consoleCore := zapcore.NewCore(encoder, consoleWriter, lowPriority)
 
 		errorCfg := c.outFile
+		// Note: It is intentionally designed here that the output error type log file name must be modified through the `SetErrorFileConfig` method
 		errorCfg.FileName = DefaultMultiFilenameError
 		if c.outErrorFile != nil {
 			errorCfg = c.outErrorFile
@@ -254,21 +255,18 @@ func (c *Config) OutInfoConsoleErrorFile(errorFilename string) *Config {
 func (c *Config) OutSingleFile(withConsole bool) *Config {
 	c.outType = OutTypeSingleFileDefault
 	c.withConsole = withConsole
-	//c.outCustom = false
 	return c
 }
 
 func (c *Config) OutMultiFile(withConsole bool) *Config {
 	c.outType = OutTypeMultiFileDefault
 	c.withConsole = withConsole
-	//c.outCustom = false
 	return c
 }
 
 func (c *Config) OutInfoConsoleErrorFile() *Config {
 	c.outType = OutTypeInfoError
 	c.withConsole = true
-	c.outCustom = false
 	return c
 }
 
@@ -284,10 +282,10 @@ func (c *Config) SetFileConfig(opts ...Option) *Config {
 func (c *Config) SetInfoFileConfig(opts ...Option) *Config {
 	c.outCustom = true
 
-	c.outInfoFile = c.outFile
+	c.outInfoFile = new(FileConfig)
+	*c.outInfoFile = *c.outFile
 	c.outInfoFile.FileName = DefaultMultiFilenameInfo
 	for _, opt := range opts {
-		fmt.Printf("opt [%v] \n", opt)
 		opt(c.outInfoFile)
 	}
 	return c
@@ -296,7 +294,8 @@ func (c *Config) SetInfoFileConfig(opts ...Option) *Config {
 func (c *Config) SetErrorFileConfig(opts ...Option) *Config {
 	c.outCustom = true
 
-	c.outErrorFile = c.outFile
+	c.outErrorFile = new(FileConfig)
+	*c.outErrorFile = *c.outFile
 	c.outErrorFile.FileName = DefaultMultiFilenameError
 	for _, opt := range opts {
 		opt(c.outErrorFile)

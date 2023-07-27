@@ -194,7 +194,7 @@ zapcore.AddSync(&lumberjack.Logger{
 除了 `WithFileName()` 外其他的自定义配置项，按照如下优先级定义：
 
 ```
-SetFileConfig() > SetInfoFileConfig()/SetErrorFileConfig()
+SetFileConfig() < SetInfoFileConfig()/SetErrorFileConfig()
 ```
 
 ----

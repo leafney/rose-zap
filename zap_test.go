@@ -27,7 +27,7 @@ func TestNewLogger(t *testing.T) {
 		//SetFileConfig(WithFileName("logs/cdf.log")).
 		SetInfoFileConfig(WithFileName(""), WithMaxSize(33)).
 		//SetErrorFileConfig(WithFileName("logs/yyyy.log")).
-		SetLevel("debug")
+		SetLevel("debug").SetEnable(false)
 
 	log := NewLogger(cfg)
 	defer log.Sync()
@@ -38,4 +38,5 @@ func TestNewLogger(t *testing.T) {
 	log.SErrorf("一个错误 %v", errors.New("不能为空"))
 	log.SDebugf("采用 %s 方式", "sugar")
 	log.SInfow("日志输出，键值对形式", "attempt", 3, "backoff", time.Second)
+
 }

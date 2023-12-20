@@ -53,6 +53,7 @@ func main(){
 - 默认输出为 `json` 格式
 - 默认显示文件名和行号
 - 默认输出 `warning` 级别以上堆栈信息
+- 支持全局启用、停用日志输出开关
 
 ### 日志级别
 
@@ -64,6 +65,10 @@ func main(){
     cfg := rzap.NewConfig().
         SetLevel("debug")
 ```
+
+### 启用开关
+
+通过 `SetEnable()` 方法更改是否启用、停用全局日志输出，默认为 `true`。
 
 ### 编码器
 

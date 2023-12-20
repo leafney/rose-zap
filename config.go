@@ -17,6 +17,7 @@ type Config struct {
 	outErrorFile   *FileConfig
 	outCustom      bool
 	showStacktrace bool
+	enabled        bool
 }
 
 func NewConfig() *Config {
@@ -39,6 +40,7 @@ func NewConfig() *Config {
 		},
 		outInfoFile:  nil,
 		outErrorFile: nil,
+		enabled:      true,
 	}
 }
 
@@ -223,5 +225,10 @@ func (c *Config) SetErrorFileConfig(opts ...Option) *Config {
 	for _, opt := range opts {
 		opt(c.outErrorFile)
 	}
+	return c
+}
+
+func (c *Config) SetEnable(enable bool) *Config {
+	c.enabled = enable
 	return c
 }

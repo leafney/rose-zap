@@ -27,7 +27,7 @@ func TestNewLogger(t *testing.T) {
 		//SetFileConfig(WithFileName("logs/cdf.log")).
 		SetInfoFileConfig(WithFileName(""), WithMaxSize(33)).
 		//SetErrorFileConfig(WithFileName("logs/yyyy.log")).
-		SetLevel("debug").SetEnable(false)
+		SetLevel("debug").SetEnable(true)
 
 	log := NewLogger(cfg)
 	defer log.Sync()

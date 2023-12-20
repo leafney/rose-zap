@@ -53,7 +53,6 @@ func main(){
 - Default output format is `json`
 - Default display of file name and line number
 - Default output of stack trace for levels above `warning`
-- Supports global enable and disable the log output switch
 
 ### Log Level
 
